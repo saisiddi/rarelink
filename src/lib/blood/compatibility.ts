@@ -56,6 +56,9 @@ export function normalizeBloodGroup(raw: string): NormalizedGroup | null {
     .toUpperCase()
     .replace(/[−–—]/g, "-")
     .replace(/[.\t]/g, " ")
+    // Digit-zero typo: "0-", "0+", "0 negative" all mean O. Only in group
+    // position (directly before +/- or pos/neg) so "0 units" is untouched.
+    .replace(/\b0(?=\s*(?:RH\s*)?(?:\+|-|POS|NEG))/g, "O")
     .replace(/\s+/g, " ")
     .trim();
   if (!cleaned) return null;

@@ -82,7 +82,9 @@ const GROUP_WORDS_REGEX = /\b(AB|A|B|O)\s*(?:Rh\s*)?(pos(?:itive)?|neg(?:ative)?
 const GROUP_SIGN_REGEX = /\b(AB|A|B|O)\s*(?:Rh\s*)?([+-])(?![A-Za-z])/i;
 
 function detectBloodGroup(text: string): { group: BloodGroup; rare: boolean } | null {
-  const lower = text.toLowerCase().replace(/[−–—]/g, "-");
+  // Same digit-zero tolerance as normalizeBloodGroup: "0-" means O-.
+  const fixed = text.replace(/\b0(?=\s*(?:Rh\s*)?(?:[+-]|pos(?:itive)?|neg(?:ative)?))/gi, "O");
+  const lower = fixed.toLowerCase().replace(/[−–—]/g, "-");
 
   // Rare phenotypes first so "bombay" never collapses into O−/Mumbai.
   if (/\b(bombay|para[\s-]?bombay|oh\s+phenotype|o\(h\)|hh)\b/.test(lower) &&
@@ -94,7 +96,7 @@ function detectBloodGroup(text: string): { group: BloodGroup; rare: boolean } | 
     return { group: "OH", rare: true };
   }
 
-  const normalizedText = text.replace(/[−–—]/g, "-");
+  const normalizedText = fixed.replace(/[−–—]/g, "-");
   const match = GROUP_WORDS_REGEX.exec(normalizedText) ?? GROUP_SIGN_REGEX.exec(normalizedText);
   if (match) {
     const normalized = normalizeBloodGroup(`${match[1]} ${match[2]}`);
@@ -110,7 +112,7 @@ function detectBloodGroup(text: string): { group: BloodGroup; rare: boolean } | 
   }
 
   // Bare "bombay" in a request context
-  if (/\bbombay\b/.test(lower) && /\b(need|require|search|find|looking|arrange|urgent)/.test(lower)) {
+  if (/\bbombay\b/.test(lower) && /\b(need|want|require|search|find|looking|arrange|urgent)/.test(lower)) {
     return { group: "OH", rare: true };
   }
   return null;
@@ -180,7 +182,9 @@ const INTENT_KEYWORDS: Array<[RegExp, AiIntent]> = [
   [/\b(status|track|my request|request status)\b/i, "request_status"],
   [/\b(hospital near|nearest hospital)\b/i, "nearby_hospital"],
   [/\b(help|how does|what can|commands?)\b/i, "help"],
-  [/\b(find|search|need|require|looking for|arrange|available)\b/i, "find_blood"],
+  // "want" is how real requests are phrased ("i want o- blood"). The donor
+  // pattern above runs first, so "want to donate" still routes to find_donor.
+  [/\b(find|search|need|want|require|looking for|arrange|available)\b/i, "find_blood"],
 ];
 
 function detectIntent(text: string, bloodGroup: BloodGroup | null): AiIntent {

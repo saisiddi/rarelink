@@ -92,6 +92,23 @@ describe("extractIntentLocal — intent label", () => {
   it("does not collapse 'blood donors' into a blood search", () => {
     expect(extractIntentLocal("find blood donors in Mumbai").intent).toBe("find_donor");
   });
+
+  it("understands 'want' as a request for blood", () => {
+    expect(extractIntentLocal("i want O- blood").intent).toBe("find_blood");
+  });
+
+  it("still routes 'want to donate' to donors", () => {
+    expect(extractIntentLocal("i want to donate blood in Delhi").intent).toBe("find_donor");
+  });
+
+  it("handles the messy real-world message end to end", () => {
+    const intent = extractIntentLocal("i want 0- blood from banglore");
+    expect(intent.intent).toBe("find_blood");
+    expect(intent.blood_group).toBe("O-");
+    expect(intent.location.city).toBe("Bengaluru");
+    expect(intent.missing).toEqual([]);
+    expect(isActionable(intent)).toBe(true);
+  });
 });
 
 describe("clarification loop", () => {

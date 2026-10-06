@@ -159,3 +159,17 @@ describe("rare phenotypes", () => {
     expect(checkCompatibility("P-BOMBAY", "PRBC").confidence).toBe("confirmation_required");
   });
 });
+
+describe("digit-zero typos", () => {
+  it("reads 0 as O in group position", () => {
+    expect(normalizeBloodGroup("0-")?.code).toBe("O-");
+    expect(normalizeBloodGroup("0+")?.code).toBe("O+");
+    expect(normalizeBloodGroup("0 negative")?.code).toBe("O-");
+    expect(normalizeBloodGroup("0 Rh+")?.code).toBe("O+");
+  });
+
+  it("leaves quantities alone", () => {
+    expect(normalizeBloodGroup("0 units")).toBeNull();
+    expect(normalizeBloodGroup("10")).toBeNull();
+  });
+});

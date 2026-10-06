@@ -128,4 +128,8 @@ describe("rare flag", () => {
   it("is implied by a rare blood group", () => {
     expect(q("bloodGroup=P-BOMBAY").rareBlood).toBe(true);
   });
+
+  it("tolerates a digit-zero typo", () => {
+    expect(q("bloodGroup=0-").bloodGroup).toBe("O-");
+  });
 });
