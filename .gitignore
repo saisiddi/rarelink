@@ -1,0 +1,38 @@
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+
+# next.js
+/.next/
+/out/
+next-env.d.ts
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+*.log
+npm-debug.log*
+
+# local database (demo data is reseeded from scripts/seed.ts)
+/data/*.db
+/data/*.db-journal
+/data/*.db-wal
+/data/*.db-shm
+
+# typescript
+*.tsbuildinfo
+
+# vitest
+/coverage
+
+# env
+.env
+.env.local
+.env*.local
+
+# ui check screenshots
+/screenshots
